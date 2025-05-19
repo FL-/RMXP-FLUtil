@@ -1,0 +1,4 @@
+Name      = FLUtil
+Version   = 1.0
+Website   = XXX
+Credits   = FL
