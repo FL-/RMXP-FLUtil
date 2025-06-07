@@ -25,7 +25,7 @@
 #  helper.allow_repeat = true
 #  helper.add(10.5, :POTION)
 #  # 3% for total. 1% for each item
-#  helper.add_range(3, [:AWAKENING,:ANTIDOTE,:BURNHEAL)
+#  helper.add_range(3, [:AWAKENING,:ANTIDOTE,:BURNHEAL])
 #  # 2% for each item. 6% for total. 
 #  helper.add_copying_weight(2, [:POKEBALL,:GREATBALL,:ULTRABALL])
 #  helper.add(80.5, nil)
@@ -142,7 +142,9 @@ end
 
 class PokemonRandomHelper < GameDataRandomHelper
   def initialize
-    @game_data = EsBridge::MAJOR_VERSION<19 ? PBSpecies : GameData::Species
+    if EsBridge::IS_ESSENTIALS
+      @game_data = EsBridge::MAJOR_VERSION<19 ? PBSpecies : GameData::Species
+    end
     super
   end
 end
