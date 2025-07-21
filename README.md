@@ -6,15 +6,15 @@ This script is for RPG Maker XP. It adds a lot of useful classes and methods for
 - Multiversion/non-essentials layer (partial)
 - Misc classes and methods
 
-Works with or without Essentials.
+Works with or without Essentials. Partially works as PSDK plugin (only RandomHelper, Variable Switches Alias and Tween).
 
 ## Download
 [![](https://custom-icon-badges.demolab.com/badge/-Download-red?style=for-the-badge&logo=download&logoColor=white)](../../archive/refs/heads/main.zip)
 
 ## Installation
-For Essentials version 19 and above, follow FL's [Essentials plugin installation instructions](https://github.com/FL-/Misc/tree/main/Guides/EssentialsInstallPlugin).
-
-For others (including non-Essentials), copy and paste the .rb files in [FLUtil folder](/Content/Plugins/FLUtil) into script sections above main, in order. You can skip the first file (only with instructions) and the last (only with test stuff for me).
+- For Essentials version 19 and above, follow FL's [Essentials plugin installation instructions](https://github.com/FL-/Misc/tree/main/Guides/EssentialsInstallPlugin).
+- For PSDK, generate a psdkplug file.
+- For others (non-Essentials and Essentials below version 19), copy and paste the .rb files in [FLUtil folder](/Content/Plugins/FLUtil) into script sections above main, in order. You can skip the last (only with test stuff for me).
 
 ## How to Use
 Look at [001_Main Notes.rb](/Content/Plugins/FLUtil/001_Main%20Notes.rb) for instructions.
