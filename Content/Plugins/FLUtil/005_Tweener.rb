@@ -65,6 +65,27 @@ class Tweener
   def stop_all
     stop_at(0) while @tween_list.size > 0
   end
+
+  # Convenience method to wait a little. When seconds is nil, wait a single 
+  # frame. If stop_proc isn't nil, call it and interrupts when it returns true.
+  def self.wait(seconds=nil, stop_proc=nil)
+    target_time = Time.now + (seconds || 0.002)
+    while Time.now < target_time && (!stop_proc || !stop_proc.call)
+      Graphics.update
+      Input.update
+      yield if block_given?
+    end
+  end
+
+  # Convenience method that returns true while tween state is different than 
+  # informed state. Default is Completed. 
+  # If stop_proc isn't nil, call it and interrupts when it returns true.
+  def self.wait_state(tween, state=nil, stop_proc=nil, &block)
+    state ||= FLTween::COMPLETED
+    while tween.state != state && (!stop_proc || !stop_proc.call)
+      wait(nil, nil, &block)
+    end
+  end
 end
 
 # v is 0-1
@@ -108,7 +129,8 @@ class FLTween
 
   #TODO
   # Each time a loop ends the difference between its endValue and its startValue
-  # will be added to the endValue, thus creating tweens that increase their values with each loop cycle.
+  # will be added to the endValue, thus creating tweens that increase their
+  # values with each loop cycle.
   INCREMENTAL_LOOP = 2
 
   def initialize(target, duration)
@@ -452,11 +474,17 @@ class ToneTween < BaseColorTween
   end
 end
 
-# Just to schedule callbacks. Can have target or not. Can also use custom updates
+# Just to schedule callbacks. Can have target or not. Can also use custom
+# updates.
 class DummyTween < FLTween
   def initialize(*args)
     args.size==2 ? super(args[0], args[1]) : super(nil, args[0])
     @target_val = [nil]
+  end
+  
+  def start
+    @current_val = [0]
+    super
   end
 end
 
@@ -514,7 +542,7 @@ class Scene_SampleTween
     ).set_ease(Ease::IN_OUT_QUAD).set_relative.set_loops(-1,FLTween::YOYO_LOOP))
     # Move Marill to (x:Graphics.width/2 and y:64) in 1.5s. Wait the animation
     # finish to start the next command.
-    wait_tween_state(@tweener.add(
+    wait_tween_completed(@tweener.add(
       MoveTween.new(@sprites["Marill"], Graphics.width/2, 64, 1.5)
     )) 
     # Wait 0.8s
@@ -522,7 +550,7 @@ class Scene_SampleTween
     # Move Marill to the current position plus (x:-128, y:16) in 3 seconds. Wait
     # the animation finish to start the next command. Set ease as
     # IN_OUT_CUBIC (slow downs in the start and in the end).
-    wait_tween_state(@tweener.add(
+    wait_tween_completed(@tweener.add(
       MoveTween.new(@sprites["Marill"], -128, 16, 3)
     ).set_ease(Ease::IN_OUT_CUBIC).set_relative)
     # Fade Marill (0 opacity) in 3.5 seconds. Set ease as IN_OUT_SINE. Wait
@@ -537,7 +565,7 @@ class Scene_SampleTween
     ).set_ease(Ease::IN_QUAD)
     # Zooms Marill to x2.5 its size.
     @tweener.add(ZoomTween.new(@sprites["Marill"], 2.5, 2.5, 4))
-    # Wait 3s. It counts only after last move, since wait_tween_state
+    # Wait 5s. It counts only after last move, since wait_tween_completed
     # wasn't used these commands. So all commands after this one runs in
     # parallel.
     wait(5)
@@ -559,21 +587,16 @@ class Scene_SampleTween
     @tweener.update
   end
 
-  # Wait a little. When is nil, wait a single frame
+  # Wait a little. When seconds is nil, wait a single frame. It will be
+  # canceled if cancel was pressed.
+  # This is basically a wait method not directly related with tween.
   def wait(seconds=nil)
-    target_time = Time.now + (seconds || 0.002)
-    while Time.now < target_time && !cancel_press?
-      Graphics.update
-      Input.update
-      self.update
-    end
+    Tweener.wait(seconds, proc{cancel_press?}){ self.update }
   end
 
-  # Return true while tween state is different than informed state. Default
-  # is Completed
-  def wait_tween_state(tween, state=nil)
-    state ||= FLTween::COMPLETED
-    wait while tween.state != state && !cancel_press?
+  # Wait while tween state isn't completed and cancel wasn't pressed.
+  def wait_tween_completed(tween)
+    Tweener.wait_state(tween, FLTween::COMPLETED, proc{cancel_press?} ){ self.update }
   end
 
   # Create just to have an easy quit. Make it false to disable it.

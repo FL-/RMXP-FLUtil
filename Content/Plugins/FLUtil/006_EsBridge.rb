@@ -31,21 +31,33 @@ module EsBridge
     elsif defined?(ESSENTIALSVERSION)
       ret = ESSENTIALSVERSION.split(".")[0].to_i
     elsif defined?(PokeBattle_Pokemon)
-      ret = 1 # Technically can be -10...10 but this makes some operations easier
+      # In this case, technically version can be -10...10 but this makes some
+      # operations easier
+      ret = 1
     end
+    return ret
+  end
+
+  def ruby_int
+    ruby_version_split = RUBY_VERSION.split('.')
+    ret = ruby_version_split[0].to_i*10_000
+    ret += ruby_version_split[1].to_i*100
+    ret += ruby_version_split[2].split('-')[0].to_i if ruby_version_split[2]
     return ret
   end
 
   MAJOR_VERSION = major_version
   IS_ESSENTIALS = MAJOR_VERSION>0
   IS_MKXP = defined?(System) && System.const_defined?(:VERSION)
+  RUBY_INT = ruby_int
   
   #-----------------------------------------------------------------------------
   # General
   #-----------------------------------------------------------------------------
 
   def delta
-    return 0.025 if !IS_MKXP || Graphics.delta > 1 # Since on some old mkxp this has a strange behavior
+    # Checks delta size since on some old mkxp this has a strange behavior
+    return 0.025 if !IS_MKXP || Graphics.delta > 1
     return Graphics.delta
   end
 
@@ -76,6 +88,13 @@ module EsBridge
   def game_data_exists?(game_data, value)
     return getID(game_data, value) != 0 if MAJOR_VERSION < 19
     return game_data.exists?(value)
+  end
+
+  def new_random(seed=nil)
+    if RUBY_INT < 20110
+      raise NotImplementedError, "main_seed only works in newer ruby"
+    end
+    return Random.new(seed)
   end
   
   #-----------------------------------------------------------------------------

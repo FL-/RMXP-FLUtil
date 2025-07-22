@@ -1,4 +1,4 @@
 Name      = FLUtil
-Version   = 1.0
+Version   = 1.1
 Website   = https://www.pokecommunity.com/threads/536375/
 Credits   = FL

@@ -7,7 +7,7 @@ This script is for RPG Maker XP. It adds a lot of useful classes and methods:
 - Tween system
 - Multiversion/non-essentials layer (partial)
 - Misc classes and methods
-Works with Essentials.
+Works with Essentials. Works also with PSDK (only the first three).
 
 ## How to use
 Look at each file header instructions.

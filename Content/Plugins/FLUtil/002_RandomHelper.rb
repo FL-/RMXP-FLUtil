@@ -36,11 +36,29 @@
 #    pbMessage("Nothing found.")
 #  end
 #
+# Proc example with seed example below. Since the main_seed was set, the first 3
+# results will be (in order): Do nothing, Show "Hello World!" and rain.
+#  
+#  helper = RandomHelper.new
+#  helper.add(3, proc{})                              # Do nothing
+#  helper.add(1, proc{$game_screen.weather(1, 9, 0)}) # Rain
+#  helper.add(1, proc{print("Hello World!")})         # Show "Hello World!"
+#  helper.main_seed = 42
+#  helper.get.call
+#  helper.get.call
+#  helper.get.call
+#
 #== NOTES ======================================================================
 #
-# helper.get also accept an seed (same seed, same results). You can use
-# helper.get_percentage(value) for getting a value percentage change. For
-# items, you can user helper.average_sell_price for average sell price.
+# helper.get also accept an seed between 0 and 1 (same seed, same results). You
+# can set an integer seed for to entire class (like 'helper.main_seed = 42'), to
+# always draw the values in the same sequence, but it only works with 
+# MKXP/newer ruby.
+#
+# You can use helper.get_percentage(value) for getting a value percentage
+# chance.
+#
+# For items, you can user helper.average_sell_price for average sell price.
 #
 #===============================================================================
 
@@ -56,6 +74,16 @@ class RandomHelper
     @allow_nil = false
     @total_weight_dirty = true
     @weights_values = []
+    @random_instance = nil # only used with main_seed
+  end
+
+  # Doesn't work with older ruby.
+  def main_seed=(value)
+    @random_instance = EsBridge.new_random(value)
+  end
+
+  def main_seed
+    return @random_instance ? @random_instance.seed : nil
   end
 
   def add(weight, value)
@@ -69,20 +97,22 @@ class RandomHelper
     @total_weight_dirty = true
   end
 
-  def get(seed = nil)
-    seed = Kernel.oldRand if !seed
+  def get(draw_seed = nil)
+    if !draw_seed
+      draw_seed = @random_instance ? @random_instance.rand : rand(0)
+    end
     raise "RandomHelper is empty." if total_weight == 0
     if !fulfill_require_weight?
       raise "RandomHelper total_height is #{total_weight}, expected #{@require_weight}."
     end
-    if seed > 1
-      raise RangeError, "Seed is #{seed}. Seeds should be between 0 and 1 (inclusive)."
+    if draw_seed  > 1
+      raise RangeError, "draw_seed  is #{draw_seed }. draw_seed s should be between 0 and 1 (inclusive)."
     end
-    seed-=0.000001 if seed==1 # small fix for 1 limit
+    draw_seed -=0.000001 if draw_seed ==1 # small fix for 1 limit
     count = 0
     for weight_value in @weights_values
       count += weight_value[0]/total_weight.to_f
-      return weight_value[1] if seed < count
+      return weight_value[1] if draw_seed  < count
     end
     raise "Unexpected result!"
   end
@@ -120,14 +150,6 @@ class RandomHelper
   # Same as add_copying_weight, but weight is divided by array size.
   def add_range(weight, array)
     add_copying_weight(weight/array.size.to_f, array)
-  end
-  
-  class << Kernel
-    if !method_defined?(:oldRand)
-      def oldRand
-        return rand
-      end
-    end
   end
 end
 

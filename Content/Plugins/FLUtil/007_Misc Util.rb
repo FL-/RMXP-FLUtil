@@ -34,11 +34,14 @@ class Numeric
     return a*(1.0-self)+b*self
   end
 
-  # Calculates the linear parameter (lerp) that produces the interpolant value within the range [a, b].
+  # Calculates the linear parameter (lerp) that produces the interpolant value
+  # within the range [a, b].
   #
-  # The a and b values define the start and end of the line. Value is a location between a and b. 
+  # The a and b values define the start and end of the line. Value is a location
+  # between a and b. 
   # Subtract a from both a and b and self to make a', b' and self'. 
-  # This makes a' to be zero and b' and self' to be reduced. Finally divide self' by b'.
+  # This makes a' to be zero and b' and self' to be reduced. Finally divide
+  # self' by b'.
   # This gives the inverse_lerp amount.
   def inverse_lerp(a, b)
     return (self.to_f-a)/(b-a)
@@ -57,7 +60,8 @@ class Numeric
   end
 
   # From Ruby 2.6.1 (or older)
-  # Returns the largest number less than or equal to float with a precision of ndigits decimal digits (default: 0).
+  # Returns the largest number less than or equal to float with a precision of
+  # ndigits decimal digits (default: 0).
   def floor_args(ndigits=0)
     return self.floor if ndigits==0
     return (self*(10**ndigits)).floor.to_f/(10**ndigits)
@@ -128,7 +132,8 @@ module Enumerable
 
   # From Ruby 1.8.7
   # Drops elements up to, but not including, the first element for which the
-  # block returns nil or false and returns an array containing the remaining elements.
+  # block returns nil or false and returns an array containing the remaining
+  # elements.
   def drop_while
     ret = []
     for item in self
@@ -166,7 +171,8 @@ module Enumerable
 
   # From Ruby 1.9.1
   # Returns the index of the first object in self such that is == to obj.
-  # If a block is given instead of an argument, returns first object for which block is true. 
+  # If a block is given instead of an argument, returns first object for which
+  # block is true. 
   # Returns nil if no match is found.
   if !method_defined?(:find_index)
     def find_index(arg=nil)
@@ -180,7 +186,8 @@ module Enumerable
 
   # From Ruby 1.9.1 rindex with args
   # Returns the index of the last object in self == to obj.
-  # If a block is given instead of an argument, returns first object for which block is true. 
+  # If a block is given instead of an argument, returns first object for which
+  # block is true. 
   # Returns nil if no match is found.
   def find_rindex(arg=nil)
     for i in 0...length
@@ -192,8 +199,10 @@ module Enumerable
 
   # From Ruby 1.9.1
   # Returns the number of elements.
-  # If an argument is given, counts the number of elements which equal obj using ==.
-  # If a block is given, counts the number of elements for which the block returns a true value.
+  # If an argument is given, counts the number of elements which equal obj
+  # using ==.
+  # If a block is given, counts the number of elements for which the block
+  # returns a true value.
   def count(*args)
     ret = 0
     for value in self
@@ -206,7 +215,8 @@ module Enumerable
 
   # From Ruby 2.1.10
   # Returns the result of interpreting enum as a list of [key, value] pairs.
-  # If a block is given, the results of the block on each element of the enum will be used as pairs.
+  # If a block is given, the results of the block on each element of the enum
+  # will be used as pairs.
   def to_h
     ret = {}
     for val in self
@@ -389,6 +399,10 @@ class Rect
   def self.new_min_max(x_min, y_min, x_max, y_max)
     return Rect.new(x_min, y_min, x_max - x_min, y_max - y_min)
   end
+
+  def contains?(x1, y1)
+    return x1 >= x && x1 < x_max && y1 >= y && y1 < y_max
+  end unless method_defined? :contains?
 end
 
 class Color
@@ -414,7 +428,7 @@ class Color
 
   # Sum all values by other (Color)
   def +(other)
-    return Color.new(red+other.red, green*other.green, blue*other.blue, alpha*other.alpha)
+    return Color.new(red+other.red, green+other.green, blue+other.blue, alpha+other.alpha)
   end
 
   # Subtract all values by other (Color)
@@ -437,7 +451,11 @@ class Color
   end
 
   def self.from_a(array)
-    return array.size == 4 ? Color.new(array[0], array[1], array[2], array[3]) : Color.new(array[0], array[1], array[2])
+    if array.size == 4
+      return Color.new(array[0], array[1], array[2], array[3])
+    else
+      return Color.new(array[0], array[1], array[2])
+    end
   end
 
   # Linearly interpolates between a and b by t.
@@ -479,7 +497,7 @@ class Tone
 
   # Sum all values by other (Tone)
   def +(other)
-    return Tone.new(red+other.red, green*other.green, blue*other.blue, gray*other.gray)
+    return Tone.new(red+other.red, green+other.green, blue+other.blue, gray+other.gray)
   end
 
   # Subtract all values by other (Tone)
@@ -502,7 +520,11 @@ class Tone
   end
 
   def self.from_a(array)
-    return array.size == 4 ? Tone.new(array[0], array[1], array[2], array[3]) : Tone.new(array[0], array[1], array[2])
+    if array.size == 4
+      return Tone.new(array[0], array[1], array[2], array[3])
+    else
+      return Tone.new(array[0], array[1], array[2])
+    end
   end
 
   # Linearly interpolates between a and b by t.
@@ -527,6 +549,20 @@ def ep(*args)
   for arg in args
     echoln(arg.inspect)
   end
+end
+
+# Same as above, but using a single line format like A:B, C:D, E:F...
+# eps means "echo print single".
+def eps(*args)
+  if args.size==1
+    echoln(args[0].inspect)
+    return
+  end
+  s = ""
+  for i in 0...args.size
+    s += i%2==0 ? "#{args[i].inspect}: " : "#{args[i].inspect}, "
+  end
+  echoln(s)
 end
 
 module FLUtil
@@ -570,7 +606,10 @@ module FLUtil
   # (e.g. direction_code_to_array(2) -> [0,1])
   # (e.g. direction_code_to_array(9) -> [1,-1])
   def direction_code_to_array(direction)
-    return 10>direction && direction>0 ? [(direction-1)%3-1, 1-(direction-1)/3] : [0,0]
+    if 10>direction && direction>0
+      return [(direction-1)%3-1, 1-(direction-1)/3]
+    end
+    return [0,0]
   end
   
   # Inform a direction code (as numpad number), returns the opposite code.
@@ -643,7 +682,8 @@ end
 module FLUtil
   module_function
 
-  # Returns type name with a divider (default is "/"). Accept two params or array
+  # Returns type name with a divider (default is "/"). Accept two params or
+  # array.
   # (e.g. type_string(:FIRE) -> "Fire")
   # (e.g. type_string(:FIRE,:FIRE) -> "Fire")
   # (e.g. type_string([:FIRE,:WATER],nil," and ") -> "Fire and Water")
@@ -661,15 +701,19 @@ module FLUtil
 
   # Easy choice system where last option returns -1
   def message(message, commands=nil)
-    ret = commands ? EsBridge.message(message,commands,commands.size) : EsBride.message(message)
+    if commands
+      ret = EsBridge.message(message,commands,commands.size)
+    else
+      ret = EsBridge.message(message)
+    end
     ret = -1 if commands && commands.size==ret+1
     return ret
   end
 
   # Gives money with message and SFX
   def receive_money(quantity)
-    EsBride.money += quantity
-    EsBride.message(_INTL("\\se[]Obtained ${1}!\\se[Mart buy item]\\wt[16]",quantity))
+    EsBridge.money += quantity
+    EsBridge.message(_INTL("\\se[]Obtained ${1}!\\se[Mart buy item]\\wt[16]",quantity))
   end
 
   # Returns an array with all current player pokémon in party, PC and Day Care.
@@ -695,7 +739,9 @@ module FLUtil
       pokemon.hp = [pokemon.hp-damage, 1].max
       someoneDamaged = true
     end
-    EsBridge.message(_INTL("Party received {1} damage!",damage)) if show_message && someoneDamaged
+    if show_message && someoneDamaged
+      EsBridge.message(_INTL("Party received {1} damage!",damage))
+    end
   end
 
   # pbChoosePokemon for species array (or single species)
@@ -730,7 +776,9 @@ module FLUtil
     ret=false
     limit = last_form_index(species)
     for pokemon in EsBridge.player.party
-      ret=true if !pokemon.egg? && pokemon.species==species && swap_form(pokemon,limit)
+      if !pokemon.egg? && pokemon.species==species && swap_form(pokemon,limit)
+        ret=true
+      end
     end
     return ret
   end
@@ -754,9 +802,11 @@ module FLUtil
 
   # Checks bag and PC
   def total_item_quantity(item)
-    return EsBridge.item_quantity(item) + (
-      $PokemonGlobal.pcItemStorage ? $PokemonGlobal.pcItemStorage.pbQuantity(item) : 0
-    )
+    ret = EsBridge.item_quantity(item)
+    if $PokemonGlobal.pcItemStorage
+      ret += $PokemonGlobal.pcItemStorage.pbQuantity(item)
+    end
+    return ret
   end
 
   def has_item_at_bag_or_pc?(item)
@@ -814,8 +864,12 @@ class ScrollPlane < AnimatedPlane
 
   def update
     super
-    @float_ox = wrap_value(@float_ox + @x_speed*EsBridge.delta, @x_limit) if @x_speed
-    @float_oy = wrap_value(@float_oy + @y_speed*EsBridge.delta, @y_limit) if @y_speed
+    if @x_speed
+      @float_ox = wrap_value(@float_ox + @x_speed*EsBridge.delta, @x_limit)
+    end
+    if @y_speed
+      @float_oy = wrap_value(@float_oy + @y_speed*EsBridge.delta, @y_limit)
+    end
     self.ox = @float_ox.round
     self.oy = @float_oy.round
   end

@@ -75,6 +75,8 @@ module FLUtil_Test
 
     ret += "\n"+compare(2, [10, nil, 20].nitems, "Array.nitems")
 
+    ret += "\n"+assert(Rect.new(1,2,30,40).contains?(5,8), "Rect.contains?")
+
     ret += "\n"+compare(Rect.new_min_max(1,2,31,42), Rect.new(1,2,30,40), "Rect new min max")
 
     rect = Rect.new(1,1,2,3)
